@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/ticker_model.dart';
 import '../blocs/ticker_bloc.dart';
+import './app_drawer.dart';
 
 class TickerList extends StatefulWidget {
-  TickerList() {}
+  static const routeName = '/tickers';
+  TickerList();
 
   @override
   _TickerListState createState() => _TickerListState();
@@ -28,6 +30,7 @@ class _TickerListState extends State<TickerList> {
       appBar: AppBar(
         title: Text('All Tickers'),
       ),
+      drawer: AppDrawer(),
       body: StreamBuilder(
         stream: bloc.allTickers,
         builder: (context, AsyncSnapshot<List<TickerModel>> snapshot) {

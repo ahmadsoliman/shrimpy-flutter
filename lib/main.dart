@@ -11,10 +11,12 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light(),
-      title: "Shrimpy",
       home: Scaffold(
         body: TickerList(),
       ),
+      routes: {
+        TickerList.routeName: (ctx) => TickerList(),
+      },
     );
   }
 }
