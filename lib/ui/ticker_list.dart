@@ -42,30 +42,50 @@ class _TickerListState extends State<TickerList> {
     );
   }
 
+  Widget wrapWithPaddedContainer(Widget w) {
+    return Container(padding: EdgeInsets.all(10), child: w);
+  }
+
   Widget buildList(AsyncSnapshot<List<TickerModel>> snapshot) {
-    return GridView.builder(
-        itemCount: snapshot.data.length,
-        gridDelegate:
-            SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
-        itemBuilder: (BuildContext context, int index) {
-          return SizedBox(
-            height: 10,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text(
-                  '${snapshot.data[index].name} (${snapshot.data[index].symbol})',
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: Table(
+        border: TableBorder.all(),
+        columnWidths: {
+          0: FixedColumnWidth(170),
+          1: FixedColumnWidth(100),
+          2: FlexColumnWidth(),
+        },
+        children: [
+          TableRow(
+            children: [
+              wrapWithPaddedContainer(Text(
+                "Coin",
+                textScaleFactor: 1.7,
+              )),
+              wrapWithPaddedContainer(Text("Price \$", textScaleFactor: 1.7)),
+              wrapWithPaddedContainer(Text("Price Btc", textScaleFactor: 1.7)),
+            ],
+          ),
+          ...snapshot.data
+              .map(
+                (item) => TableRow(
+                  children: [
+                    wrapWithPaddedContainer(Text(
+                      '${item.name} (${item.symbol})',
+                    )),
+                    wrapWithPaddedContainer(Text(
+                      '\$${item.priceUsd.toStringAsFixed(2)}',
+                    )),
+                    wrapWithPaddedContainer(Text(
+                      '${(item.priceBtc * 1000).toStringAsFixed(4)}mBTC',
+                    )),
+                  ],
                 ),
-                Text(
-                  '\$${snapshot.data[index].priceUsd.toStringAsFixed(2)}',
-                ),
-                Text(
-                  '${(snapshot.data[index].priceBtc * 1000).toStringAsFixed(4)}mBTC',
-                ),
-              ],
-            ),
-          );
-        });
+              )
+              .toList()
+        ],
+      ),
+    );
   }
 }
