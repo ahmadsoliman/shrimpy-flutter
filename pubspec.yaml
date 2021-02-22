@@ -34,6 +34,8 @@ dependencies:
 
   provider: ^4.3.3
 
+  crypto: any
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

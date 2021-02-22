@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './ticker_list.dart';
+import './account_list.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -24,7 +25,7 @@ class AppDrawer extends StatelessWidget {
             leading: Icon(Icons.shop),
             title: Text('Dashboard'),
             onTap: () {
-              Navigator.of(context).pushReplacementNamed('/');
+              Navigator.of(context).pushReplacementNamed(AccountList.routeName);
             },
           ),
           Divider(),
