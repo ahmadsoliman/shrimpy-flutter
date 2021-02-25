@@ -10,9 +10,9 @@ class _BalanceBloc {
   Observable<AccountBalancesModel> get accountBalances =>
       _balancesFetcher.stream;
 
-  fetchAllTickers(accountId) async {
+  fetchBalances(accountId, String publicKey, String secret) async {
     AccountBalancesModel balances =
-        await _repository.fetchAccountBalances(accountId);
+        await _repository.fetchAccountBalances(accountId, publicKey, secret);
     _balancesFetcher.sink.add(balances);
   }
 
@@ -21,4 +21,4 @@ class _BalanceBloc {
   }
 }
 
-final bloc = _BalanceBloc();
+final balanceBloc = _BalanceBloc();

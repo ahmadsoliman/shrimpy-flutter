@@ -10,7 +10,16 @@ void main() {
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return
+        // MultiProvider(
+        //   providers: [
+        //     ChangeNotifierProvider.value(
+        //       value: AuthProvider(),
+        //     ),
+        //   ],
+        //   child: Consumer<AuthProvider>(
+        //     builder: (ctx, auth, _) =>
+        MaterialApp(
       theme: ThemeData.light(),
       home: Scaffold(
         body: TickerList(),
@@ -20,5 +29,7 @@ class App extends StatelessWidget {
         AccountList.routeName: (ctx) => AccountList()
       },
     );
+    //   ),
+    // );
   }
 }

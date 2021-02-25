@@ -9,8 +9,9 @@ class _AccountBloc {
 
   Observable<List<AccountModel>> get accounts => _accountsFetcher.stream;
 
-  fetchAccounts() async {
-    List<AccountModel> accounts = await _repository.fetchAccounts();
+  fetchAccounts(String publicKey, String secret) async {
+    List<AccountModel> accounts =
+        await _repository.fetchAccounts(publicKey, secret);
     _accountsFetcher.sink.add(accounts);
   }
 
@@ -19,4 +20,4 @@ class _AccountBloc {
   }
 }
 
-final bloc = _AccountBloc();
+final accountBloc = _AccountBloc();

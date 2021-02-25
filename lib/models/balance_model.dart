@@ -6,9 +6,9 @@ class BalanceModel {
 
   BalanceModel.fromJson(Map<String, dynamic> parsedJson) {
     _symbol = parsedJson['symbol'];
-    _nativeValue = double.parse(parsedJson['nativeValue']);
-    _btcValue = double.parse(parsedJson['btcValue']);
-    _usdValue = double.parse(parsedJson['usdValue']);
+    _nativeValue = double.parse(parsedJson['nativeValue'].toString());
+    _btcValue = parsedJson['btcValue'];
+    _usdValue = parsedJson['usdValue'];
   }
 
   String get symbol => _symbol;
@@ -23,9 +23,9 @@ class AccountBalancesModel {
 
   AccountBalancesModel.fromJson(Map<String, dynamic> parsedJson) {
     _retrievedAt = DateTime.parse(parsedJson['retrievedAt']);
-    _balances = parsedJson['balances']
-        .map((item) => BalanceModel.fromJson(item))
-        .toList();
+    _balances = [];
+    parsedJson['balances']
+        .forEach((item) => _balances.add(BalanceModel.fromJson(item)));
   }
 
   DateTime get retrievedAt => _retrievedAt;
