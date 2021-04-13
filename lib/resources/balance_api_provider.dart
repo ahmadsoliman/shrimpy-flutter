@@ -9,7 +9,7 @@ class BalanceApiProvider {
   Client client = Client();
 
   Future<AccountBalancesModel> fetchAccountBalance(
-      int exchangeAccountId, publicKey, secret) async {
+      int exchangeAccountId, String publicKey, String secret) async {
     final headers = Repository().getHeaders(
       '/v1/accounts/$exchangeAccountId/balance',
       publicKey: publicKey,

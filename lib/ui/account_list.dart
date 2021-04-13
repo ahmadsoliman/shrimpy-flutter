@@ -105,7 +105,7 @@ class _AccountListState extends State<AccountList> {
                             ),
                           ),
                           RaisedButton(
-                            onPressed: () => this.loadAccounts(),
+                            onPressed: () => this.loadAccounts(snapshot),
                             child: Text("Load Accounts"),
                           ),
                         ],
@@ -133,11 +133,6 @@ class _AccountListState extends State<AccountList> {
   }
 
   Widget buildList(AsyncSnapshot<List<AccountModel>> snapshot) {
-    balanceBloc.fetchBalances(
-      snapshot.data[0].id,
-      _publicKeyController.value.text,
-      _secretController.value.text,
-    );
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
@@ -182,10 +177,10 @@ class _AccountListState extends State<AccountList> {
     );
   }
 
-  loadAccounts() {
+  loadAccounts(AsyncSnapshot<List<AccountModel>> snapshot) {
     final String publicKey = _publicKeyController.text;
     _storage.writeValue('publicKey', publicKey);
-    String secret = '';
+    var secret = '';
 
     final String password = _passwordController.text;
     final key = Encrypt.Key.fromUtf8(password.padRight(32));
@@ -196,7 +191,7 @@ class _AccountListState extends State<AccountList> {
       final String encryptedSecret = _secretController.text;
       final decrypted = encrypter.decrypt64(encryptedSecret, iv: iv);
 
-      secret = decrypted;
+      secret = decrypted + '';
     } else {
       secret = _secretController.text;
 
@@ -205,5 +200,10 @@ class _AccountListState extends State<AccountList> {
       _storage.writeValue('privateKey', encrypted.base64);
     }
     accountBloc.fetchAccounts(publicKey, secret);
+    balanceBloc.fetchBalances(
+      snapshot.data[0].id,
+      publicKey,
+      secret,
+    );
   }
 }

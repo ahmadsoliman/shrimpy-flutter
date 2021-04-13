@@ -11,11 +11,11 @@ class AuthProvider with ChangeNotifier {
     _secret = secret;
   }
 
-  _getSignature(int nonce, String url, String method, {secret}) {
+  _getSignature(int nonce, String url, String method, String secret) {
     var prehashString = url + method + nonce.toString();
     var prehashStringBytes = utf8.encode(prehashString);
 
-    final key = base64.decode(secret ?? _secret);
+    final key = base64.decode(secret);
 
     var hmacSha256 = new Hmac(sha256, key); // HMAC-SHA256
     var digest = hmacSha256.convert(prehashStringBytes);
@@ -28,7 +28,7 @@ class AuthProvider with ChangeNotifier {
     return {
       'SHRIMPY-API-KEY': publicKey ?? _publicKey,
       'SHRIMPY-API-NONCE': nonce.toString(),
-      'SHRIMPY-API-SIGNATURE': _getSignature(nonce, url, method, secret: secret)
+      'SHRIMPY-API-SIGNATURE': _getSignature(nonce, url, method, secret)
     };
   }
 }
