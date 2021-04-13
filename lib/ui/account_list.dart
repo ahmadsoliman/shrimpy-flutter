@@ -2,7 +2,6 @@ import 'package:Shrimpy/models/account_model.dart';
 import 'package:Shrimpy/models/balance_model.dart';
 import 'package:flutter/material.dart';
 import 'package:encrypt/encrypt.dart' as Encrypt;
-import 'dart:convert';
 
 import '../services/storage.dart';
 import '../blocs/account_bloc.dart';
@@ -19,10 +18,15 @@ class AccountList extends StatefulWidget {
 
 class _AccountListState extends State<AccountList> {
   final _storage = SecureStorageService();
+  final _accountBloc = new AccountBloc();
+  final _balanceBloc = new BalanceBloc();
 
   final _publicKeyController = TextEditingController();
   final _secretController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  var _publicKey = '';
+  var _secret = '';
 
   bool _isSecretSaved = false;
 
@@ -35,8 +39,8 @@ class _AccountListState extends State<AccountList> {
 
   @override
   void dispose() {
-    accountBloc.dispose();
-    balanceBloc.dispose();
+    _accountBloc.dispose();
+    _balanceBloc.dispose();
     super.dispose();
   }
 
@@ -63,7 +67,7 @@ class _AccountListState extends State<AccountList> {
             ),
             drawer: AppDrawer(),
             body: StreamBuilder(
-              stream: accountBloc.accounts,
+              stream: _accountBloc.accounts,
               builder: (context, AsyncSnapshot<List<AccountModel>> snapshot) {
                 return Container(
                   constraints: BoxConstraints(minHeight: 320),
@@ -105,7 +109,10 @@ class _AccountListState extends State<AccountList> {
                             ),
                           ),
                           RaisedButton(
-                            onPressed: () => this.loadAccounts(snapshot),
+                            onPressed: () {
+                              this.initSecret();
+                              this.loadAccounts();
+                            },
                             child: Text("Load Accounts"),
                           ),
                         ],
@@ -133,10 +140,12 @@ class _AccountListState extends State<AccountList> {
   }
 
   Widget buildList(AsyncSnapshot<List<AccountModel>> snapshot) {
+    var accounts = snapshot.data;
+    this.loadAccountsBalances(accounts);
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
-          children: snapshot.data
+          children: accounts
               .map(
                 (item) => Column(
                   children: [
@@ -149,25 +158,32 @@ class _AccountListState extends State<AccountList> {
                       ),
                     ),
                     StreamBuilder(
-                      stream: balanceBloc.accountBalances,
+                      stream: _balanceBloc.accountBalances(item.id),
                       builder: (context,
-                          AsyncSnapshot<AccountBalancesModel> snapshot) {
-                        return Column(
-                            children: snapshot.data.balances
-                                .map((balance) => Row(
-                                      children: [
-                                        wrapWithPaddedContainer(Text(
-                                          '${balance.symbol} ${balance.nativeValue}',
-                                        )),
-                                        wrapWithPaddedContainer(Text(
-                                          '\$${balance.usdValue.toStringAsFixed(2)}',
-                                        )),
-                                        wrapWithPaddedContainer(Text(
-                                          '${(balance.btcValue * 1000).toStringAsFixed(4)}mBTC',
-                                        )),
-                                      ],
-                                    ))
-                                .toList());
+                          AsyncSnapshot<AccountBalancesModel> snapshot2) {
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: Column(
+                            children: snapshot2.data != null
+                                ? snapshot2.data.balances
+                                    .where((balance) => balance.usdValue > 10)
+                                    .map((balance) => Row(
+                                          children: [
+                                            wrapWithPaddedContainer(Text(
+                                              '${balance.symbol} ${balance.nativeValue / 100}',
+                                            )),
+                                            wrapWithPaddedContainer(Text(
+                                              '\$${(balance.usdValue / 100).toStringAsFixed(2)}',
+                                            )),
+                                            wrapWithPaddedContainer(Text(
+                                              '${((balance.btcValue / 100) * 1000).toStringAsFixed(4)}mBTC',
+                                            )),
+                                          ],
+                                        ))
+                                    .toList()
+                                : [],
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -177,10 +193,9 @@ class _AccountListState extends State<AccountList> {
     );
   }
 
-  loadAccounts(AsyncSnapshot<List<AccountModel>> snapshot) {
-    final String publicKey = _publicKeyController.text;
-    _storage.writeValue('publicKey', publicKey);
-    var secret = '';
+  initSecret() {
+    _publicKey = _publicKeyController.text;
+    _storage.writeValue('publicKey', _publicKey);
 
     final String password = _passwordController.text;
     final key = Encrypt.Key.fromUtf8(password.padRight(32));
@@ -191,19 +206,27 @@ class _AccountListState extends State<AccountList> {
       final String encryptedSecret = _secretController.text;
       final decrypted = encrypter.decrypt64(encryptedSecret, iv: iv);
 
-      secret = decrypted + '';
+      _secret = decrypted;
     } else {
-      secret = _secretController.text;
+      _secret = _secretController.text;
 
-      final encrypted = encrypter.encrypt(secret, iv: iv);
+      final encrypted = encrypter.encrypt(_secret, iv: iv);
 
       _storage.writeValue('privateKey', encrypted.base64);
     }
-    accountBloc.fetchAccounts(publicKey, secret);
-    balanceBloc.fetchBalances(
-      snapshot.data[0].id,
-      publicKey,
-      secret,
-    );
+  }
+
+  loadAccounts() {
+    _accountBloc.fetchAccounts(_publicKey, _secret);
+  }
+
+  loadAccountsBalances(List<AccountModel> accounts) {
+    accounts.forEach((element) {
+      _balanceBloc.fetchBalances(
+        element.id,
+        _publicKey,
+        _secret,
+      );
+    });
   }
 }

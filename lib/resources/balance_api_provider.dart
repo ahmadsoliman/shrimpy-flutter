@@ -26,7 +26,9 @@ class BalanceApiProvider {
       return AccountBalancesModel.fromJson(balances);
     } else {
       // If that call was not successful, throw an error.
-      throw Exception('Failed to load balances');
+      return AccountBalancesModel.fromJson(
+          {'retrievedAt': DateTime.now().toIso8601String()});
+      // throw Exception('Failed to load balances');
     }
   }
 }

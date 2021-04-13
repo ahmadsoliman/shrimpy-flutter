@@ -3,7 +3,7 @@ import 'package:rxdart/rxdart.dart';
 import '../resources/repository.dart';
 import '../models/account_model.dart';
 
-class _AccountBloc {
+class AccountBloc {
   final _repository = Repository();
   final _accountsFetcher = PublishSubject<List<AccountModel>>();
 
@@ -19,5 +19,3 @@ class _AccountBloc {
     _accountsFetcher.close();
   }
 }
-
-final accountBloc = _AccountBloc();

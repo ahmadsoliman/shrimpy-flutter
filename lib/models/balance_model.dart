@@ -24,8 +24,8 @@ class AccountBalancesModel {
   AccountBalancesModel.fromJson(Map<String, dynamic> parsedJson) {
     _retrievedAt = DateTime.parse(parsedJson['retrievedAt']);
     _balances = [];
-    parsedJson['balances']
-        .forEach((item) => _balances.add(BalanceModel.fromJson(item)));
+    parsedJson['balances'] ??
+        [].forEach((item) => _balances.add(BalanceModel.fromJson(item)));
   }
 
   DateTime get retrievedAt => _retrievedAt;
